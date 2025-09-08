@@ -1,14 +1,23 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
-metadata: { name: demo-app-prd, namespace: argocd }
+metadata:
+  name: demo-app-prd
+  namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/anuragup/kaiko-assignment.git
     targetRevision: main
     path: gitops/helm/demo-app
-    helm: { valueFiles: ["../values-prd.yaml"] }
-  destination: { server: https://kubernetes.default.svc, namespace: prd }
+    helm:
+      valueFiles:
+        - environments/prd.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: prd
   syncPolicy:
-    automated: { prune: false, selfHeal: true }   # controlled prod sync
-    syncOptions: ["CreateNamespace=true"]
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

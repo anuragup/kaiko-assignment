@@ -1,39 +1,18 @@
-# gitops/helm/demo-app/environments/prd.yaml
-image:
-  repository: demo-app        # or your registry/repo
-  tag: "0.1.0"
-
+image: { repository: demo-app, tag: "0.1.0" }
 replicas: 5
-
 resources:
   requests: { cpu: "300m", memory: "384Mi" }
   limits:   { cpu: "800m", memory: "768Mi" }
-
 env:
   READINESS_DELAY_SEC: "10"
   FAIL_RATE: "0.005"
-
-# For prod we typically use External Secrets; set this on/off as per your setup
-secret:
-  enabled: false            # Off if using External Secrets
-secrets:
-  enabled: false            # Set to true only if you have a SecretStore wired
-
-hpa:
-  enabled: true
-  minReplicas: 5
-  maxReplicas: 20
-  cpu: 65
-  memory: 70
-
-rollout:
-  enabled: false            # Set true only if you templated a Rollout
-
+secret: { enabled: false }  # use External Secrets in real prod
+secrets: { enabled: false }
+hpa: { enabled: true, minReplicas: 5, maxReplicas: 20, cpu: 65, memory: 70 }
+rollout: { enabled: false }
 ingress:
   enabled: true
   className: nginx
   host: demo.example.com
   tlsSecretName: demo-tls
-
-servicemonitor:
-  enabled: false            # true if Prometheus Operator is installed
+servicemonitor: { enabled: false }
