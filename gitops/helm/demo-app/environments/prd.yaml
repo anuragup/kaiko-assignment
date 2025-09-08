@@ -1,6 +1,4 @@
-image:
-  repository: demo-app         # or <your-registry>/demo-app
-  tag: "0.1.0"
+image: { repository: demo-app, tag: "0.1.0" }
 
 replicas: 5
 
@@ -8,30 +6,16 @@ resources:
   requests: { cpu: "300m", memory: "384Mi" }
   limits:   { cpu: "800m", memory: "768Mi" }
 
-env:
-  READINESS_DELAY_SEC: "10"
-  FAIL_RATE: "0.005"
+env: { READINESS_DELAY_SEC: "10", FAIL_RATE: "0.005" }
 
-# Demo: plain Secret off in prod; flip to External Secrets if you wired ESO
-secret: { enabled: false }
-secrets:
-  enabled: false
-  # storeName: prod-secrets
-  # greetingKey: prod/demo-app/GREETING
+# Ensure pod can start: create an in-cluster Secret (until ESO is wired)
+secret: { enabled: true, GREETING: "Hello from prod" }
+secrets: { enabled: false }
 
-hpa:
-  enabled: true
-  minReplicas: 5
-  maxReplicas: 20
-  cpu: 65
-  memory: 70
+hpa: { enabled: true, minReplicas: 5, maxReplicas: 20, cpu: 65, memory: 70 }
 
-rollout: { enabled: false }    # set true only if you templated a Rollout
+# Keep ingress off unless you installed NGINX+cert-manager locally
+ingress: { enabled: false }
 
-ingress:
-  enabled: true
-  className: nginx
-  host: demo.example.com
-  tlsSecretName: demo-tls
-
-servicemonitor: { enabled: false }
+# IMPORTANT: render Deployment, not Rollout
+rollout: { enabled: false }

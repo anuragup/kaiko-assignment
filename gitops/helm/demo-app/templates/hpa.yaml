@@ -3,7 +3,10 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata: { name: demo-app }
 spec:
-  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: demo-app }
+  scaleTargetRef:
+    apiVersion: {{ if .Values.rollout.enabled }}argoproj.io/v1alpha1{{ else }}apps/v1{{ end }}
+    kind:       {{ if .Values.rollout.enabled }}Rollout{{ else }}Deployment{{ end }}
+    name: demo-app
   minReplicas: {{ .Values.hpa.minReplicas }}
   maxReplicas: {{ .Values.hpa.maxReplicas }}
   metrics:
