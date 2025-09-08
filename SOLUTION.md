@@ -149,7 +149,7 @@ kubectl apply -f gitops/argocd/app-prd.yaml
 
 # Evidence
 
-![Dev resources](images/Screenshot 2025-09-08 at 1.14.20 PM.png)
+![Dev resources](images/Dev resources.png)
 ![Argo CD dashboard](images/Screenshot images\2025-09-08 at 1.05.51 PM.png)
 ![Dev app details](images/Screenshot images\Screenshot 2025-09-08 at 1.06.04 PM.png)
 ![Prod app details](images/Screenshot 2025-09-08 at 1.06.33 PM.png)
