@@ -1,0 +1,19 @@
+image: { repository: demo-app, tag: "0.1.0" }
+replicas: 5
+resources:
+  requests: { cpu: "300m", memory: "384Mi" }
+  limits:   { cpu: "800m", memory: "768Mi" }
+env: { READINESS_DELAY_SEC: "10", FAIL_RATE: "0.005" }
+secret: { enabled: false }
+secrets:
+  enabled: true
+  storeName: prod-secrets          # create this SecretStore separately
+  greetingKey: prod/demo-app/GREETING
+hpa: { enabled: true, minReplicas: 5, maxReplicas: 20, cpu: 65, memory: 70 }
+rollout: { enabled: false }        # set true if you add a Rollout template
+ingress:
+  enabled: true
+  className: nginx
+  host: demo.example.com
+  tlsSecretName: demo-tls
+servicemonitor: { enabled: true }

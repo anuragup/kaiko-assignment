@@ -1,0 +1,6 @@
+apiVersion: v2
+name: demo-app
+version: 0.1.0
+description: Demo Flask app with DRY, multi-env Helm chart
+type: application
+appVersion: "0.1.0"

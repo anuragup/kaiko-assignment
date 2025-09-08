@@ -1,0 +1,6 @@
+apiVersion: v1
+kind: ConfigMap
+metadata: { name: app-config }
+data:
+  READINESS_DELAY_SEC: "{{ .Values.env.READINESS_DELAY_SEC }}"
+  FAIL_RATE: "{{ .Values.env.FAIL_RATE }}"

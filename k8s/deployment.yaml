@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: demo-app, namespace: dev }
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: { maxUnavailable: 0, maxSurge: 1 }
+  selector:
+    matchLabels: { app: demo-app }
+  template:
+    metadata:
+      labels: { app: demo-app }
+    spec:
+      nodeSelector: { workload: "true" }
+      containers:
+      - name: demo-app
+        image: demo-app:0.1.0
+        imagePullPolicy: IfNotPresent
+        ports: [{ containerPort: 8000, name: http }]
+        env:
+        - name: GREETING
+          valueFrom: { secretKeyRef: { name: app-secret, key: GREETING } }
+        - name: READINESS_DELAY_SEC
+          valueFrom: { configMapKeyRef: { name: app-config, key: READINESS_DELAY_SEC } }
+        - name: FAIL_RATE
+          valueFrom: { configMapKeyRef: { name: app-config, key: FAIL_RATE } }
+        readinessProbe: { httpGet: { path: /readyz, port: 8000 }, initialDelaySeconds: 5, periodSeconds: 5 }
+        livenessProbe:  { httpGet: { path: /healthz, port: 8000 }, initialDelaySeconds: 10, periodSeconds: 10 }
+        startupProbe:   { httpGet: { path: /healthz, port: 8000 }, failureThreshold: 30, periodSeconds: 1 }
+        resources:
+          requests: { cpu: "200m", memory: "256Mi" }
+          limits:   { cpu: "500m", memory: "512Mi" }
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 10001
+          runAsGroup: 10001
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities: { drop: ["ALL"] }

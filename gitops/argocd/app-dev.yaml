@@ -1,0 +1,14 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata: { name: demo-app-dev, namespace: argocd }
+spec:
+  project: default
+  source:
+    repoURL: 
+    targetRevision: main
+    path: gitops/helm/demo-app
+    helm: { valueFiles: ["../values-dev.yaml"] }
+  destination: { server: https://kubernetes.default.svc, namespace: dev }
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+    syncOptions: ["CreateNamespace=true"]

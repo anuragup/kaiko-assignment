@@ -1,0 +1,9 @@
+image: { repository: demo-app, tag: "0.1.0" }
+replicas: 3
+env: { READINESS_DELAY_SEC: "10", FAIL_RATE: "0.02" }
+secret: { enabled: true, GREETING: "Hello from dev" }
+secrets: { enabled: false }
+hpa: { enabled: true, minReplicas: 3, maxReplicas: 10, cpu: 70, memory: 70 }
+rollout: { enabled: false }
+ingress: { enabled: false }
+servicemonitor: { enabled: false }

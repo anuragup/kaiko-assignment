@@ -1,0 +1,25 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: default-deny, namespace: dev }
+spec:
+  podSelector: {}
+  policyTypes: [Ingress, Egress]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: allow-same-namespace-and-dns, namespace: dev }
+spec:
+  podSelector:
+    matchLabels: { app: demo-app }
+  ingress:
+  - from:
+    - podSelector: {}        # same namespace
+  egress:
+  - to:
+    - namespaceSelector: {}
+      podSelector:
+        matchLabels: { k8s-app: kube-dns }
+    ports:
+    - { protocol: UDP, port: 53 }
+    - { protocol: TCP, port: 53 }
