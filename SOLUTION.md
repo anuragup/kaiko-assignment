@@ -146,4 +146,3 @@ kubectl apply -f gitops/argocd/app-prd.yaml
 - [x] Separate dev and prd environments
 - [x] DRY Helm chart with environment-specific values
 - [x] Argo CD shows Healthy/Synced apps
-
