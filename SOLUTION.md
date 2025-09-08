@@ -1,4 +1,4 @@
-#Part 1: Kubernetes Setup
+# Part 1: Kubernetes Setup
 
 Problem & Approach
 
@@ -8,7 +8,7 @@ I used kind to create the local cluster, as the assignment examples and acceptan
 In production, the same manifests would run on a managed service such as AKS/EKS/GKE, with multi-AZ worker pools, autoscaling, ingress with TLS, and external secret management.
 
 
-#Solution Overview
+# Solution Overview
 
 Cluster & Namespace
 
@@ -20,7 +20,7 @@ Cluster & Namespace
 
 - ResourceQuota & LimitRange added to enforce fairness in a multi-tenant cluster.
 
-Application Deployment
+# Application Deployment
 
 - Container: Built from provided Dockerfile, hardened with non-root user. 
 
@@ -45,11 +45,11 @@ Application Deployment
   drop all capabilities, seccomp default.
 
 
-#Why This Design (Summary)
+# Why This Design (Summary)
 
 The app is deployed as a Deployment for safe rolling updates, exposed only via a ClusterIP Service with port-forward to minimize attack surface. A dedicated namespace with NetworkPolicies enforces multi-tenant isolation, while ConfigMaps and Secrets cleanly separate configuration from sensitive data. Health probes ensure smooth rollouts, and resource requests/limits with HPA handle traffic spikes efficiently. A PDB maintains availability during updates, and strict SecurityContext settings enforce least-privilege execution.
 
-#Future Enhancements (Production-ready)
+# Future Enhancements (Production-ready)
 
 Ingress with TLS (cert-manager) instead of port-forward.
 External secrets integration with cloud KMS/Secret Manager.
@@ -59,7 +59,7 @@ Multi-AZ managed cluster with autoscaling node pools.
 
 
 
-#Part 2: GitOps with Argo CD
+# Part 2: GitOps with Argo CD
 
 Problem & Approach
 
@@ -73,21 +73,21 @@ GitOps Tooling
 - RBAC/SSO integrated for role separation: dev teams can sync dev, ops team controls prd.
 - Sync windows configured so prd changes can only occur during approved times.
 
-Environment Differences
+# Environment Differences
 
 - Dev: 3 replicas, modest resource limits, higher FAIL_RATE. Auto-sync enabled.
 - Prod: 5 replicas, larger resource limits, lower FAIL_RATE, TLS ingress enabled, External Secrets for sensitive config, and Argo Rollouts for canary deployment with Prometheus-based analysis. Sync is manual/controlled.
 
 Both environments use the same Helm chart, ensuring DRY manifests and consistency.
 
-Argo CD Applications
+# Argo CD Applications
 
 app-dev.yaml deploys to the dev namespace using values-dev.yaml.
 app-prd.yaml deploys to the prd namespace using values-prd.yaml.
 
 Both applications show Healthy and Synced status in Argo CD after reconciliation.
 
-#Why This Design
+# Why This Design
 
 - GitOps with Argo CD provides Git as the single source of truth, enabling drift detection, auditability, and continuous reconciliation.
 
@@ -107,7 +107,7 @@ Production hardening is built-in:
 
 - Pod Security Admission and Kyverno/Gatekeeper enforce non-root, resource limits, and signed images
 
-How to Run
+# How to Run
 
 # Build app image
 docker build -t demo-app:0.1.0 ./app
@@ -124,3 +124,26 @@ kubectl create ns argocd
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 kubectl apply -f gitops/argocd/app-dev.yaml
 kubectl apply -f gitops/argocd/app-prd.yaml
+
+
+# Assumptions & Trade-offs
+
+- Used kind for local demo; in production would use AKS/EKS/GKE.
+- Chose Deployment over StatefulSet since the app is stateless.
+- For simplicity, prod secrets are not wired to an external Secret Manager.
+- Ingress disabled in dev to reduce footprint; enabled in prod for realism.
+- Used basic metrics-server for HPA; production would integrate with Prometheus Adapter.
+
+# Acceptance Criteria (Checklist)
+
+- [x] App accessible via port-forward on port 8000 (Part 1)
+- [x] /healthz, /readyz, /metrics endpoints respond
+- [x] Resource requests/limits configured
+- [x] SecurityContext with non-root and least privilege
+- [x] NetworkPolicy restricts traffic within namespace
+- [x] PodDisruptionBudget configured
+- [x] Application deployed declaratively via Argo CD
+- [x] Separate dev and prd environments
+- [x] DRY Helm chart with environment-specific values
+- [x] Argo CD shows Healthy/Synced apps
+
