@@ -1,0 +1,43 @@
+{{- if .Values.rollout.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: demo-app
+  labels: { app: demo-app }
+spec:
+  replicas: {{ .Values.replicas }}
+  selector: { matchLabels: { app: demo-app } }
+  strategy:
+    canary:
+      steps:
+        - setWeight: 10
+        - pause: { duration: 120 }
+        - setWeight: 50
+        - pause: { duration: 180 }
+  template:
+    metadata: { labels: { app: demo-app } }
+    spec:
+      nodeSelector: { workload: "true" }
+      containers:
+      - name: app
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        ports: [{ containerPort: 8000, name: http }]
+        env:
+        - name: GREETING
+          valueFrom: { secretKeyRef: { name: app-secret, key: GREETING } }
+        - name: READINESS_DELAY_SEC
+          value: "{{ .Values.env.READINESS_DELAY_SEC }}"
+        - name: FAIL_RATE
+          value: "{{ .Values.env.FAIL_RATE }}"
+        readinessProbe: { httpGet: { path: /readyz, port: 8000 } }
+        livenessProbe:  { httpGet: { path: /healthz, port: 8000 } }
+        startupProbe:   { httpGet: { path: /healthz, port: 8000 }, failureThreshold: 30, periodSeconds: 1 }
+        resources:
+          requests: {{- toYaml .Values.resources.requests | nindent 10 }}
+          limits:   {{- toYaml .Values.resources.limits   | nindent 10 }}
+        securityContext:
+          runAsNonRoot: true
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities: { drop: ["ALL"] }
+{{- end }}
